@@ -20,6 +20,29 @@ function useReveal() {
   }, []);
 }
 
+// Хук для параллакса от курсора
+function useMouseParallax() {
+  const raf = useRef<number>(0);
+
+  useEffect(() => {
+    const handle = (e: MouseEvent) => {
+      const cx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const cy = (e.clientY / window.innerHeight - 0.5) * 2;
+      raf.current = requestAnimationFrame(() => {
+        document.querySelectorAll<HTMLElement>("[data-parallax]").forEach((el) => {
+          const speed = parseFloat(el.dataset.parallax ?? "1");
+          el.style.transform = `translate(${cx * speed * 18}px, ${cy * speed * 18}px)`;
+        });
+      });
+    };
+    window.addEventListener("mousemove", handle, { passive: true });
+    return () => {
+      window.removeEventListener("mousemove", handle);
+      cancelAnimationFrame(raf.current);
+    };
+  }, []);
+}
+
 function useParallax(ref: React.RefObject<HTMLElement>, speed = 0.15) {
   useEffect(() => {
     const el = ref.current;
@@ -962,22 +985,142 @@ function Footer() {
   );
 }
 
+// ─── BACKGROUND LAYER ─────────────────────────────────────────────────────────
+function GlobalBackground() {
+  return (
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      {/* Текстура — тонкая сетка точек */}
+      <div
+        className="absolute inset-0 opacity-[0.035]"
+        style={{
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)`,
+          backgroundSize: "36px 36px",
+        }}
+      />
+
+      {/* Крупные градиентные пятна — фиксированные */}
+      <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)" }} />
+      <div className="absolute bottom-[10%] right-[-5%] w-[500px] h-[500px] rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(34,211,238,0.06) 0%, transparent 70%)" }} />
+      <div className="absolute top-[45%] left-[35%] w-[700px] h-[300px] rounded-full"
+        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.04) 0%, transparent 70%)" }} />
+
+      {/* Параллакс-элементы — двигаются за курсором */}
+
+      {/* Большой синий круг — верхний левый */}
+      <div
+        data-parallax="0.6"
+        className="absolute top-[8%] left-[5%] w-72 h-72 rounded-full border border-blue-500/10"
+        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+      />
+
+      {/* Малый голубой круг — правый центр */}
+      <div
+        data-parallax="1.2"
+        className="absolute top-[30%] right-[8%] w-40 h-40 rounded-full border border-cyan-400/15"
+        style={{ background: "radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 70%)", transition: "transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+      />
+
+      {/* Квадрат повёрнутый — левый центр */}
+      <div
+        data-parallax="0.8"
+        className="absolute top-[55%] left-[3%] w-24 h-24 border border-blue-500/10 rotate-45"
+        style={{ transition: "transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+      />
+
+      {/* Крестик / плюс — правый верх */}
+      <div
+        data-parallax="1.5"
+        className="absolute top-[15%] right-[18%] opacity-20"
+        style={{ transition: "transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+      >
+        <div className="relative w-8 h-8">
+          <div className="absolute top-1/2 left-0 w-full h-px bg-blue-400" />
+          <div className="absolute left-1/2 top-0 h-full w-px bg-blue-400" />
+        </div>
+      </div>
+
+      {/* Крестик — нижний левый */}
+      <div
+        data-parallax="1.0"
+        className="absolute bottom-[25%] left-[20%] opacity-15"
+        style={{ transition: "transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+      >
+        <div className="relative w-6 h-6">
+          <div className="absolute top-1/2 left-0 w-full h-px bg-cyan-400" />
+          <div className="absolute left-1/2 top-0 h-full w-px bg-cyan-400" />
+        </div>
+      </div>
+
+      {/* Треугольник — нижний правый */}
+      <div
+        data-parallax="0.9"
+        className="absolute bottom-[15%] right-[12%] opacity-10"
+        style={{ transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+      >
+        <div
+          style={{
+            width: 0, height: 0,
+            borderLeft: "30px solid transparent",
+            borderRight: "30px solid transparent",
+            borderBottom: "52px solid rgba(59,130,246,0.6)",
+          }}
+        />
+      </div>
+
+      {/* Маленькие точки — рассыпаны по фону */}
+      {[
+        { top: "12%", left: "28%", p: "1.8" },
+        { top: "38%", left: "72%", p: "0.7" },
+        { top: "65%", left: "48%", p: "1.3" },
+        { top: "80%", left: "80%", p: "1.1" },
+        { top: "22%", left: "55%", p: "0.5" },
+        { top: "50%", left: "15%", p: "1.6" },
+      ].map((d, i) => (
+        <div
+          key={i}
+          data-parallax={d.p}
+          className="absolute w-2 h-2 rounded-full bg-blue-400/30"
+          style={{ top: d.top, left: d.left, transition: `transform ${0.3 + i * 0.1}s cubic-bezier(0.25,0.46,0.45,0.94)` }}
+        />
+      ))}
+
+      {/* Горизонтальные линии — декор */}
+      <div
+        data-parallax="0.3"
+        className="absolute top-[42%] left-0 w-[15%] h-px"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.2), transparent)", transition: "transform 0.8s ease" }}
+      />
+      <div
+        data-parallax="0.3"
+        className="absolute top-[60%] right-0 w-[12%] h-px"
+        style={{ background: "linear-gradient(270deg, transparent, rgba(34,211,238,0.2), transparent)", transition: "transform 0.8s ease" }}
+      />
+    </div>
+  );
+}
+
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 const Index = () => {
   useReveal();
+  useMouseParallax();
   return (
-    <div className="min-h-screen bg-background text-foreground font-montserrat">
-      <Nav />
-      <Hero />
-      <Ticker />
-      <Services />
-      <VideoSection />
-      <About />
-      <Clients />
-      <Process />
-      <Calculator />
-      <Contact />
-      <Footer />
+    <div className="min-h-screen bg-background text-foreground font-montserrat relative">
+      <GlobalBackground />
+      <div className="relative z-10">
+        <Nav />
+        <Hero />
+        <Ticker />
+        <Services />
+        <VideoSection />
+        <About />
+        <Clients />
+        <Process />
+        <Calculator />
+        <Contact />
+        <Footer />
+      </div>
     </div>
   );
 };

@@ -254,26 +254,70 @@ function Services() {
 
 // ─── VIDEO ────────────────────────────────────────────────────────────────────
 function VideoSection() {
-  const [playing, setPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          videoRef.current?.play();
+        } else {
+          videoRef.current?.pause();
+        }
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="py-10 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="section-reveal relative rounded-3xl overflow-hidden group cursor-pointer" onClick={() => setPlaying(true)}>
-          <img src={OFFICE_IMG} alt="Процесс разработки" className="w-full h-[480px] object-cover brightness-40 group-hover:brightness-50 transition-all duration-500" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            {!playing ? (
-              <>
-                <div className="w-20 h-20 rounded-full glass-dark border-2 border-neon flex items-center justify-center mb-6 animate-glow-pulse group-hover:scale-110 transition-transform duration-300">
-                  <Icon name="Play" size={30} className="text-neon ml-1" />
-                </div>
-                <h3 className="font-oswald text-4xl font-bold text-white mb-3">КАК МЫ РАБОТАЕМ</h3>
-                <p className="text-white/60 text-base max-w-md">Смотри за процессом создания сайта — от брифинга до запуска</p>
-              </>
-            ) : (
-              <div className="text-white/60 text-lg font-medium">Видео скоро появится здесь</div>
-            )}
+        <div ref={sectionRef} className="section-reveal relative rounded-3xl overflow-hidden">
+          {/* Placeholder показывается пока не скроллнули до секции */}
+          <div className={`absolute inset-0 transition-opacity duration-700 ${visible ? "opacity-0 pointer-events-none" : "opacity-100"}`}>
+            <img src={OFFICE_IMG} alt="Процесс разработки" className="w-full h-[480px] object-cover brightness-40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60 flex flex-col items-center justify-center text-center">
+              <div className="w-20 h-20 rounded-full glass-dark border-2 border-neon flex items-center justify-center mb-6 animate-glow-pulse">
+                <Icon name="Play" size={30} className="text-neon ml-1" />
+              </div>
+              <h3 className="font-oswald text-4xl font-bold text-white mb-3">КАК МЫ РАБОТАЕМ</h3>
+              <p className="text-white/60 text-base max-w-md">Процесс создания сайта — от брифинга до запуска</p>
+            </div>
           </div>
+
+          {/* Видео — автозапуск при скролле */}
+          <video
+            ref={videoRef}
+            className="w-full h-[480px] object-cover"
+            muted
+            loop
+            playsInline
+            poster={OFFICE_IMG}
+          >
+            {/* Сюда вставить ссылку на видео-файл, например: */}
+            {/* <source src="https://your-cdn.com/video.mp4" type="video/mp4" /> */}
+          </video>
+
+          <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-black/50 pointer-events-none" />
+
+          {/* Подпись поверх видео */}
+          <div className={`absolute bottom-8 left-8 right-8 transition-all duration-700 ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+            <div className="glass-dark rounded-2xl px-6 py-4 inline-flex items-center gap-4">
+              <div className="w-2.5 h-2.5 rounded-full bg-neon animate-pulse flex-shrink-0" />
+              <div>
+                <div className="font-oswald font-bold text-white text-lg">КАК МЫ РАБОТАЕМ</div>
+                <div className="text-white/50 text-xs">Процесс создания сайта — от брифинга до запуска</div>
+              </div>
+            </div>
+          </div>
+
           <div className="absolute top-4 left-4 w-8 h-8 border-t-2 border-l-2 border-neon/60 rounded-tl-lg" />
           <div className="absolute top-4 right-4 w-8 h-8 border-t-2 border-r-2 border-neon/60 rounded-tr-lg" />
           <div className="absolute bottom-4 left-4 w-8 h-8 border-b-2 border-l-2 border-neon/60 rounded-bl-lg" />

@@ -430,207 +430,347 @@ function Clients() {
   );
 }
 
-// ─── CALCULATOR ───────────────────────────────────────────────────────────────
-type CalcOption = { label: string; price: number; key: string };
+// ─── QUIZ CALCULATOR ──────────────────────────────────────────────────────────
+type QuizOption = { key: string; label: string; desc?: string; icon: string; price: number };
 
-function CalcGroup({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="glass rounded-2xl p-5 border border-white/8">
-      <div className="font-oswald font-semibold text-white text-base mb-4">{title}</div>
-      {children}
-    </div>
-  );
-}
+type QuizStep = {
+  id: string;
+  question: string;
+  hint?: string;
+  multi: boolean;
+  options: QuizOption[];
+};
 
-function ResultRow({ label, value, prefix = "" }: { label: string; value: number; prefix?: string }) {
-  return (
-    <div className="flex justify-between items-center text-sm">
-      <span className="text-white/50 truncate mr-2">{label}</span>
-      <span className="text-white/80 font-medium whitespace-nowrap">{prefix}{value.toLocaleString("ru-RU")} ₽</span>
-    </div>
-  );
-}
+const QUIZ_STEPS: QuizStep[] = [
+  {
+    id: "type",
+    question: "Какой сайт вам нужен?",
+    hint: "Выберите один вариант",
+    multi: false,
+    options: [
+      { key: "landing", label: "Лендинг", desc: "Одностраничный сайт для продукта или услуги", icon: "Layout", price: 20000 },
+      { key: "corporate", label: "Корпоративный сайт", desc: "Сайт компании с разделами и контентом", icon: "Building2", price: 45000 },
+      { key: "catalog", label: "Сайт-каталог", desc: "Каталог товаров или услуг без оплаты", icon: "BookOpen", price: 60000 },
+      { key: "shop", label: "Интернет-магазин", desc: "Полноценный магазин с корзиной и оплатой", icon: "ShoppingCart", price: 90000 },
+      { key: "portal", label: "Веб-портал", desc: "Сложный проект с личными кабинетами", icon: "Globe", price: 150000 },
+    ],
+  },
+  {
+    id: "pages",
+    question: "Сколько страниц нужно?",
+    hint: "Выберите один вариант",
+    multi: false,
+    options: [
+      { key: "5", label: "До 5 страниц", desc: "Главная, услуги, контакты", icon: "FileText", price: 0 },
+      { key: "10", label: "6–10 страниц", desc: "Полноценный небольшой сайт", icon: "Files", price: 10000 },
+      { key: "20", label: "11–20 страниц", desc: "Средний корпоративный сайт", icon: "Layers", price: 20000 },
+      { key: "50", label: "20+ страниц", desc: "Крупный сайт с большим контентом", icon: "Database", price: 40000 },
+    ],
+  },
+  {
+    id: "design",
+    question: "Какой уровень дизайна?",
+    hint: "Выберите один вариант",
+    multi: false,
+    options: [
+      { key: "template", label: "На шаблоне", desc: "Быстро и бюджетно", icon: "Copy", price: 0 },
+      { key: "standard", label: "Стандартный", desc: "Уникальный дизайн под ваш бренд", icon: "Pencil", price: 15000 },
+      { key: "premium", label: "Премиум", desc: "Сложные анимации и детальная проработка", icon: "Star", price: 35000 },
+      { key: "exclusive", label: "Эксклюзивный", desc: "Авторский дизайн, WOW-эффект", icon: "Crown", price: 70000 },
+    ],
+  },
+  {
+    id: "features",
+    question: "Нужны дополнительные функции?",
+    hint: "Можно выбрать несколько",
+    multi: true,
+    options: [
+      { key: "crm", label: "Интеграция с CRM", desc: "Заявки сразу в вашу систему", icon: "Link", price: 12000 },
+      { key: "pay", label: "Онлайн-оплата", desc: "Приём платежей на сайте", icon: "CreditCard", price: 10000 },
+      { key: "cabinet", label: "Личный кабинет", desc: "Регистрация и профиль пользователя", icon: "UserCircle", price: 25000 },
+      { key: "chat", label: "Онлайн-чат", desc: "Чат поддержки на сайте", icon: "MessageCircle", price: 5000 },
+      { key: "multilang", label: "Мультиязычность", desc: "Сайт на нескольких языках", icon: "Languages", price: 18000 },
+      { key: "blog", label: "Блог / новости", desc: "Раздел с публикациями", icon: "Newspaper", price: 8000 },
+    ],
+  },
+  {
+    id: "promo",
+    question: "Нужно продвижение сайта?",
+    hint: "Можно выбрать несколько",
+    multi: true,
+    options: [
+      { key: "seo3", label: "SEO на 3 месяца", desc: "Вывод в топ Яндекс и Google", icon: "TrendingUp", price: 45000 },
+      { key: "seo6", label: "SEO на 6 месяцев", desc: "Устойчивый рост органики", icon: "BarChart2", price: 75000 },
+      { key: "context", label: "Контекстная реклама", desc: "Яндекс Директ — быстрые заявки", icon: "Target", price: 30000 },
+      { key: "smm", label: "SMM на 3 месяца", desc: "Продвижение в соцсетях", icon: "Share2", price: 60000 },
+    ],
+  },
+];
 
 function Calculator() {
-  const [siteType, setSiteType] = useState("landing");
-  const [pages, setPages] = useState("5");
-  const [design, setDesign] = useState("standard");
-  const [features, setFeatures] = useState<string[]>([]);
-  const [promotion, setPromotion] = useState<string[]>([]);
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  const [animDir, setAnimDir] = useState<"forward" | "back">("forward");
+  const [animating, setAnimating] = useState(false);
+  const [done, setDone] = useState(false);
 
-  const siteTypes: CalcOption[] = [
-    { key: "landing", label: "Лендинг", price: 20000 },
-    { key: "corporate", label: "Корпоративный сайт", price: 45000 },
-    { key: "catalog", label: "Сайт-каталог", price: 60000 },
-    { key: "shop", label: "Интернет-магазин", price: 90000 },
-    { key: "portal", label: "Веб-портал", price: 150000 },
-  ];
+  const current = QUIZ_STEPS[step];
+  const totalSteps = QUIZ_STEPS.length;
+  const progress = ((step) / totalSteps) * 100;
 
-  const pageOptions: CalcOption[] = [
-    { key: "5", label: "до 5 страниц", price: 0 },
-    { key: "10", label: "6–10 страниц", price: 10000 },
-    { key: "20", label: "11–20 страниц", price: 20000 },
-    { key: "50+", label: "20+ страниц", price: 40000 },
-  ];
+  const selected = answers[current?.id] ?? [];
 
-  const designOptions: CalcOption[] = [
-    { key: "template", label: "На шаблоне", price: 0 },
-    { key: "standard", label: "Стандартный", price: 15000 },
-    { key: "premium", label: "Премиум", price: 35000 },
-    { key: "exclusive", label: "Эксклюзивный", price: 70000 },
-  ];
+  const toggleOption = (key: string) => {
+    const id = current.id;
+    if (current.multi) {
+      setAnswers((prev) => {
+        const cur = prev[id] ?? [];
+        return { ...prev, [id]: cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key] };
+      });
+    } else {
+      setAnswers((prev) => ({ ...prev, [id]: [key] }));
+    }
+  };
 
-  const featureOptions: CalcOption[] = [
-    { key: "crm", label: "Интеграция с CRM", price: 12000 },
-    { key: "pay", label: "Онлайн-оплата", price: 10000 },
-    { key: "cabinet", label: "Личный кабинет", price: 25000 },
-    { key: "chat", label: "Онлайн-чат", price: 5000 },
-    { key: "multilang", label: "Мультиязычность", price: 18000 },
-    { key: "blog", label: "Блог / новости", price: 8000 },
-  ];
+  const canNext = selected.length > 0 || current?.multi;
 
-  const promoOptions: CalcOption[] = [
-    { key: "seo3", label: "SEO (3 мес.)", price: 45000 },
-    { key: "seo6", label: "SEO (6 мес.)", price: 75000 },
-    { key: "context", label: "Контекстная реклама", price: 30000 },
-    { key: "smm", label: "SMM (3 мес.)", price: 60000 },
-  ];
+  const goTo = (nextStep: number, dir: "forward" | "back") => {
+    setAnimDir(dir);
+    setAnimating(true);
+    setTimeout(() => {
+      setStep(nextStep);
+      setAnimating(false);
+    }, 280);
+  };
 
-  const toggle = (arr: string[], setArr: (v: string[]) => void, key: string) =>
-    setArr(arr.includes(key) ? arr.filter((k) => k !== key) : [...arr, key]);
+  const handleNext = () => {
+    if (step < totalSteps - 1) {
+      goTo(step + 1, "forward");
+    } else {
+      setAnimating(true);
+      setTimeout(() => { setDone(true); setAnimating(false); }, 280);
+    }
+  };
 
-  const total = (() => {
-    const base = siteTypes.find((t) => t.key === siteType)?.price ?? 0;
-    const p = pageOptions.find((o) => o.key === pages)?.price ?? 0;
-    const d = designOptions.find((o) => o.key === design)?.price ?? 0;
-    const f = featureOptions.filter((o) => features.includes(o.key)).reduce((s, o) => s + o.price, 0);
-    const pr = promoOptions.filter((o) => promotion.includes(o.key)).reduce((s, o) => s + o.price, 0);
-    return base + p + d + f + pr;
-  })();
+  const handleBack = () => {
+    if (step > 0) goTo(step - 1, "back");
+  };
 
-  const promoTotal = promoOptions.filter((o) => promotion.includes(o.key)).reduce((s, o) => s + o.price, 0);
+  const handleRestart = () => {
+    setAnimating(true);
+    setTimeout(() => { setStep(0); setAnswers({}); setDone(false); setAnimating(false); }, 280);
+  };
+
+  const calcTotal = () => {
+    let total = 0;
+    QUIZ_STEPS.forEach((s) => {
+      const sel = answers[s.id] ?? [];
+      sel.forEach((key) => {
+        const opt = s.options.find((o) => o.key === key);
+        if (opt) total += opt.price;
+      });
+    });
+    return total;
+  };
+
+  const promoTotal = (answers["promo"] ?? []).reduce((s, k) => {
+    const opt = QUIZ_STEPS[4].options.find((o) => o.key === k);
+    return s + (opt?.price ?? 0);
+  }, 0);
+
+  const total = calcTotal();
+
+  const slideClass = animating
+    ? animDir === "forward"
+      ? "opacity-0 translate-x-8"
+      : "opacity-0 -translate-x-8"
+    : "opacity-100 translate-x-0";
 
   return (
     <section id="calculator" className="py-28 relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-neon/5 blur-[150px] pointer-events-none" />
-      <div className="max-w-6xl mx-auto px-6 relative z-10">
-        <div className="section-reveal text-center mb-16">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-neon/5 blur-[150px] pointer-events-none" />
+
+      <div className="max-w-3xl mx-auto px-6 relative z-10">
+        <div className="section-reveal text-center mb-12">
           <span className="text-neon text-sm font-semibold uppercase tracking-widest">Калькулятор</span>
-          <h2 className="font-oswald text-5xl font-bold text-white mt-3 mb-4">РАССЧИТАЙ СТОИМОСТЬ</h2>
-          <p className="text-white/50 text-base max-w-xl mx-auto">Выбери параметры и узнай стоимость прямо сейчас — без звонков и ожидания</p>
+          <h2 className="font-oswald text-5xl font-bold text-white mt-3 mb-3">РАССЧИТАЙ СТОИМОСТЬ</h2>
+          <p className="text-white/50 text-base">Ответь на 5 вопросов — получи точную стоимость проекта</p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 section-reveal">
-          <div className="lg:col-span-2 space-y-6">
-            <CalcGroup title="Тип сайта">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {siteTypes.map((t) => (
-                  <button key={t.key} onClick={() => setSiteType(t.key)}
-                    className={`text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 border ${siteType === t.key ? "bg-neon/15 border-neon text-neon" : "glass border-white/10 text-white/60 hover:border-white/30 hover:text-white"}`}>
-                    <div className="font-semibold">{t.label}</div>
-                    <div className={`text-xs mt-0.5 ${siteType === t.key ? "text-neon/70" : "text-white/30"}`}>от {t.price.toLocaleString("ru-RU")} ₽</div>
-                  </button>
-                ))}
-              </div>
-            </CalcGroup>
-
-            <CalcGroup title="Количество страниц">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {pageOptions.map((o) => (
-                  <button key={o.key} onClick={() => setPages(o.key)}
-                    className={`px-4 py-3 rounded-xl text-sm font-medium text-center transition-all duration-200 border ${pages === o.key ? "bg-neon/15 border-neon text-neon" : "glass border-white/10 text-white/60 hover:border-white/30 hover:text-white"}`}>
-                    {o.label}
-                    {o.price > 0 && <div className={`text-xs mt-0.5 ${pages === o.key ? "text-neon/70" : "text-white/30"}`}>+{o.price.toLocaleString("ru-RU")} ₽</div>}
-                  </button>
-                ))}
-              </div>
-            </CalcGroup>
-
-            <CalcGroup title="Уровень дизайна">
-              <div className="grid grid-cols-2 gap-2">
-                {designOptions.map((o) => (
-                  <button key={o.key} onClick={() => setDesign(o.key)}
-                    className={`text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 border ${design === o.key ? "bg-neon/15 border-neon text-neon" : "glass border-white/10 text-white/60 hover:border-white/30 hover:text-white"}`}>
-                    <div className="font-semibold">{o.label}</div>
-                    <div className={`text-xs mt-0.5 ${design === o.key ? "text-neon/70" : "text-white/30"}`}>{o.price === 0 ? "включено" : `+${o.price.toLocaleString("ru-RU")} ₽`}</div>
-                  </button>
-                ))}
-              </div>
-            </CalcGroup>
-
-            <CalcGroup title="Дополнительные функции">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {featureOptions.map((o) => (
-                  <button key={o.key} onClick={() => toggle(features, setFeatures, o.key)}
-                    className={`text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 border ${features.includes(o.key) ? "bg-neon/15 border-neon text-neon" : "glass border-white/10 text-white/60 hover:border-white/30 hover:text-white"}`}>
-                    <div className="flex items-start justify-between gap-1">
-                      <span className="font-medium leading-tight">{o.label}</span>
-                      {features.includes(o.key) && <Icon name="Check" size={14} className="text-neon flex-shrink-0 mt-0.5" />}
-                    </div>
-                    <div className={`text-xs mt-1 ${features.includes(o.key) ? "text-neon/70" : "text-white/30"}`}>+{o.price.toLocaleString("ru-RU")} ₽</div>
-                  </button>
-                ))}
-              </div>
-            </CalcGroup>
-
-            <CalcGroup title="Продвижение в интернете">
-              <div className="grid grid-cols-2 gap-2">
-                {promoOptions.map((o) => (
-                  <button key={o.key} onClick={() => toggle(promotion, setPromotion, o.key)}
-                    className={`text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 border ${promotion.includes(o.key) ? "bg-neon/15 border-neon text-neon" : "glass border-white/10 text-white/60 hover:border-white/30 hover:text-white"}`}>
-                    <div className="flex items-start justify-between gap-1">
-                      <span className="font-medium leading-tight">{o.label}</span>
-                      {promotion.includes(o.key) && <Icon name="Check" size={14} className="text-neon flex-shrink-0 mt-0.5" />}
-                    </div>
-                    <div className={`text-xs mt-1 ${promotion.includes(o.key) ? "text-neon/70" : "text-white/30"}`}>{o.price.toLocaleString("ru-RU")} ₽</div>
-                  </button>
-                ))}
-              </div>
-            </CalcGroup>
-          </div>
-
-          {/* Sticky result */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 glass neon-border rounded-2xl p-6 space-y-5">
-              <div className="text-white/50 text-xs uppercase tracking-widest font-semibold">Ваш расчёт</div>
-              <div className="space-y-2">
-                <ResultRow label={siteTypes.find((t) => t.key === siteType)?.label ?? ""} value={siteTypes.find((t) => t.key === siteType)?.price ?? 0} />
-                {(pageOptions.find((o) => o.key === pages)?.price ?? 0) > 0 && (
-                  <ResultRow label="Страницы" value={pageOptions.find((o) => o.key === pages)?.price ?? 0} prefix="+" />
-                )}
-                {(designOptions.find((o) => o.key === design)?.price ?? 0) > 0 && (
-                  <ResultRow label="Дизайн" value={designOptions.find((o) => o.key === design)?.price ?? 0} prefix="+" />
-                )}
-                {features.map((k) => {
-                  const f = featureOptions.find((o) => o.key === k);
-                  return f ? <ResultRow key={k} label={f.label} value={f.price} prefix="+" /> : null;
-                })}
-                {promotion.map((k) => {
-                  const f = promoOptions.find((o) => o.key === k);
-                  return f ? <ResultRow key={k} label={f.label} value={f.price} prefix="+" /> : null;
-                })}
-              </div>
-
-              <div className="border-t border-white/10 pt-4">
-                <div className="flex justify-between items-baseline mb-1">
-                  <span className="text-white/50 text-sm">Итого</span>
-                  <span className="font-oswald text-2xl font-bold text-white">{total.toLocaleString("ru-RU")} ₽</span>
-                </div>
-                {promoTotal > 0 && (
-                  <div className="glass bg-neon/10 rounded-xl p-3 mt-3 border border-neon/20">
-                    <div className="text-neon text-xs font-semibold mb-1">🔥 Скидка 50% на рекламу</div>
-                    <div className="text-white/60 text-xs">
-                      Экономия: <span className="text-neon font-bold">{(promoTotal / 2).toLocaleString("ru-RU")} ₽</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <button className="w-full gradient-neon text-black font-bold py-4 rounded-xl text-base hover:opacity-90 transition-opacity">
-                Оставить заявку
-              </button>
-              <p className="text-white/30 text-xs text-center">Финальная стоимость после брифинга. Без скрытых платежей.</p>
+        <div className="section-reveal glass rounded-3xl border border-white/8 overflow-hidden">
+          {/* Progress bar */}
+          {!done && (
+            <div className="h-1 bg-white/5">
+              <div
+                className="h-full gradient-neon transition-all duration-500 ease-out"
+                style={{ width: `${progress}%` }}
+              />
             </div>
+          )}
+
+          <div className="p-8 md:p-10">
+            {!done ? (
+              <div
+                className={`transition-all duration-280 ease-out ${slideClass}`}
+                style={{ transition: "opacity 0.28s ease, transform 0.28s ease" }}
+              >
+                {/* Step counter */}
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-2">
+                    {QUIZ_STEPS.map((_, i) => (
+                      <div key={i} className={`rounded-full transition-all duration-300 ${
+                        i === step ? "w-6 h-2 gradient-neon" : i < step ? "w-2 h-2 bg-neon/60" : "w-2 h-2 bg-white/15"
+                      }`} />
+                    ))}
+                  </div>
+                  <span className="text-white/30 text-sm font-medium">{step + 1} / {totalSteps}</span>
+                </div>
+
+                {/* Question */}
+                <h3 className="font-oswald text-2xl md:text-3xl font-bold text-white mb-2">
+                  {current.question}
+                </h3>
+                {current.hint && (
+                  <p className="text-white/40 text-sm mb-8">{current.hint}</p>
+                )}
+
+                {/* Options */}
+                <div className={`grid gap-3 mb-8 ${current.options.length <= 4 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+                  {current.options.map((opt) => {
+                    const isSelected = selected.includes(opt.key);
+                    return (
+                      <button
+                        key={opt.key}
+                        onClick={() => toggleOption(opt.key)}
+                        className={`group relative text-left p-4 rounded-2xl border transition-all duration-200 ${
+                          isSelected
+                            ? "bg-neon/10 border-neon shadow-[0_0_25px_rgba(59,130,246,0.2)]"
+                            : "glass border-white/8 hover:border-white/25 hover:bg-white/5"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${
+                            isSelected ? "bg-neon/20" : "bg-white/5 group-hover:bg-white/10"
+                          }`}>
+                            <Icon name={opt.icon} size={17} className={isSelected ? "text-neon" : "text-white/40"} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className={`font-semibold text-sm mb-0.5 transition-colors ${isSelected ? "text-neon" : "text-white"}`}>
+                              {opt.label}
+                            </div>
+                            {opt.desc && (
+                              <div className="text-white/40 text-xs leading-snug">{opt.desc}</div>
+                            )}
+                          </div>
+                          {opt.price > 0 && (
+                            <div className={`text-xs font-bold whitespace-nowrap flex-shrink-0 ${isSelected ? "text-neon" : "text-white/25"}`}>
+                              +{(opt.price / 1000)}к ₽
+                            </div>
+                          )}
+                        </div>
+                        {isSelected && (
+                          <div className="absolute top-3 right-3">
+                            <div className="w-5 h-5 rounded-full gradient-neon flex items-center justify-center">
+                              <Icon name="Check" size={11} className="text-black" />
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Navigation */}
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={handleBack}
+                    className={`flex items-center gap-2 text-sm font-medium transition-all duration-200 ${
+                      step === 0 ? "opacity-0 pointer-events-none" : "text-white/50 hover:text-white"
+                    }`}
+                  >
+                    <Icon name="ArrowLeft" size={16} />
+                    Назад
+                  </button>
+
+                  <button
+                    onClick={handleNext}
+                    disabled={!canNext && selected.length === 0}
+                    className={`flex items-center gap-2 px-7 py-3 rounded-full font-bold text-sm transition-all duration-200 ${
+                      canNext || selected.length > 0
+                        ? "gradient-neon text-black hover:opacity-90 hover:scale-105"
+                        : "bg-white/10 text-white/30 cursor-not-allowed"
+                    }`}
+                  >
+                    {step === totalSteps - 1 ? "Узнать стоимость" : "Далее"}
+                    <Icon name="ArrowRight" size={16} />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* Result screen */
+              <div
+                className={`transition-all duration-280 ease-out ${slideClass}`}
+                style={{ transition: "opacity 0.28s ease, transform 0.28s ease" }}
+              >
+                <div className="text-center mb-8">
+                  <div className="w-16 h-16 gradient-neon rounded-2xl flex items-center justify-center mx-auto mb-5">
+                    <Icon name="CheckCircle" size={30} className="text-black" />
+                  </div>
+                  <h3 className="font-oswald text-3xl font-bold text-white mb-2">Ваш расчёт готов!</h3>
+                  <p className="text-white/50 text-sm">Стоимость рассчитана на основе ваших ответов</p>
+                </div>
+
+                {/* Summary */}
+                <div className="space-y-2 mb-6">
+                  {QUIZ_STEPS.map((s) => {
+                    const sel = answers[s.id] ?? [];
+                    if (sel.length === 0) return null;
+                    return sel.map((key) => {
+                      const opt = s.options.find((o) => o.key === key);
+                      if (!opt) return null;
+                      return (
+                        <div key={key} className="flex justify-between items-center text-sm py-2 border-b border-white/5">
+                          <span className="text-white/60 flex items-center gap-2">
+                            <Icon name={opt.icon} size={13} className="text-neon/60" />
+                            {opt.label}
+                          </span>
+                          <span className="text-white font-medium">
+                            {opt.price === 0 ? "включено" : `${opt.price.toLocaleString("ru-RU")} ₽`}
+                          </span>
+                        </div>
+                      );
+                    });
+                  })}
+                </div>
+
+                {/* Total */}
+                <div className="glass rounded-2xl p-5 border border-neon/25 mb-6">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-white/60 text-sm">Итоговая стоимость</span>
+                    <span className="font-oswald text-3xl font-bold text-white">{total.toLocaleString("ru-RU")} ₽</span>
+                  </div>
+                  {promoTotal > 0 && (
+                    <div className="flex items-center gap-2 text-sm mt-3 pt-3 border-t border-white/8">
+                      <span className="text-2xl">🔥</span>
+                      <div>
+                        <span className="text-white/60">Скидка 50% на рекламу — экономия </span>
+                        <span className="text-neon font-bold">{(promoTotal / 2).toLocaleString("ru-RU")} ₽</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <a href="#contact" className="gradient-neon text-black font-bold py-3.5 rounded-xl text-sm text-center hover:opacity-90 transition-opacity">
+                    Оставить заявку
+                  </a>
+                  <button onClick={handleRestart} className="glass border border-white/15 text-white/70 font-semibold py-3.5 rounded-xl text-sm hover:border-white/30 hover:text-white transition-all">
+                    Пересчитать
+                  </button>
+                </div>
+                <p className="text-white/25 text-xs text-center mt-4">Финальная стоимость уточняется после брифинга. Без скрытых платежей.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

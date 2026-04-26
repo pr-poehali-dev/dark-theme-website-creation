@@ -590,7 +590,7 @@ function Calculator() {
     <section id="calculator" className="py-28 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] rounded-full bg-neon/5 blur-[150px] pointer-events-none" />
 
-      <div className="max-w-3xl mx-auto px-6 relative z-10">
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="section-reveal text-center mb-12">
           <span className="text-neon text-sm font-semibold uppercase tracking-widest">Калькулятор</span>
           <h2 className="font-oswald text-5xl font-bold text-white mt-3 mb-3">РАССЧИТАЙ СТОИМОСТЬ</h2>
@@ -608,7 +608,7 @@ function Calculator() {
             </div>
           )}
 
-          <div className="p-8 md:p-10">
+          <div className="p-8 md:p-12 lg:p-16">
             {!done ? (
               <div
                 className={`transition-all duration-280 ease-out ${slideClass}`}
@@ -619,7 +619,7 @@ function Calculator() {
                   <div className="flex items-center gap-2">
                     {QUIZ_STEPS.map((_, i) => (
                       <div key={i} className={`rounded-full transition-all duration-300 ${
-                        i === step ? "w-6 h-2 gradient-neon" : i < step ? "w-2 h-2 bg-neon/60" : "w-2 h-2 bg-white/15"
+                        i === step ? "w-8 h-2 gradient-neon" : i < step ? "w-2 h-2 bg-neon/60" : "w-2 h-2 bg-white/15"
                       }`} />
                     ))}
                   </div>
@@ -627,54 +627,58 @@ function Calculator() {
                 </div>
 
                 {/* Question */}
-                <h3 className="font-oswald text-2xl md:text-3xl font-bold text-white mb-2">
+                <h3 className="font-oswald text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-2">
                   {current.question}
                 </h3>
                 {current.hint && (
-                  <p className="text-white/40 text-sm mb-8">{current.hint}</p>
+                  <p className="text-white/40 text-sm mb-10">{current.hint}</p>
                 )}
 
                 {/* Options */}
-                <div className={`grid gap-3 mb-8 ${current.options.length <= 4 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+                <div className={`grid gap-4 mb-10 ${
+                  current.options.length <= 4
+                    ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                    : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                }`}>
                   {current.options.map((opt) => {
                     const isSelected = selected.includes(opt.key);
                     return (
                       <button
                         key={opt.key}
                         onClick={() => toggleOption(opt.key)}
-                        className={`group relative text-left p-4 rounded-2xl border transition-all duration-200 ${
+                        className={`group relative text-left p-5 lg:p-6 rounded-2xl border transition-all duration-200 ${
                           isSelected
-                            ? "bg-neon/10 border-neon shadow-[0_0_25px_rgba(59,130,246,0.2)]"
+                            ? "bg-neon/10 border-neon shadow-[0_0_30px_rgba(59,130,246,0.2)]"
                             : "glass border-white/8 hover:border-white/25 hover:bg-white/5"
                         }`}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${
-                            isSelected ? "bg-neon/20" : "bg-white/5 group-hover:bg-white/10"
-                          }`}>
-                            <Icon name={opt.icon} size={17} className={isSelected ? "text-neon" : "text-white/40"} />
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-start justify-between">
+                            <div className={`w-11 h-11 lg:w-14 lg:h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-200 ${
+                              isSelected ? "bg-neon/20" : "bg-white/5 group-hover:bg-white/10"
+                            }`}>
+                              <Icon name={opt.icon} size={20} className={isSelected ? "text-neon" : "text-white/40"} />
+                            </div>
+                            {isSelected && (
+                              <div className="w-6 h-6 rounded-full gradient-neon flex items-center justify-center flex-shrink-0">
+                                <Icon name="Check" size={13} className="text-black" />
+                              </div>
+                            )}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className={`font-semibold text-sm mb-0.5 transition-colors ${isSelected ? "text-neon" : "text-white"}`}>
+                          <div>
+                            <div className={`font-oswald font-semibold text-base lg:text-lg mb-1 transition-colors ${isSelected ? "text-neon" : "text-white"}`}>
                               {opt.label}
                             </div>
                             {opt.desc && (
-                              <div className="text-white/40 text-xs leading-snug">{opt.desc}</div>
+                              <div className="text-white/40 text-xs lg:text-sm leading-snug">{opt.desc}</div>
                             )}
                           </div>
                           {opt.price > 0 && (
-                            <div className={`text-xs font-bold whitespace-nowrap flex-shrink-0 ${isSelected ? "text-neon" : "text-white/25"}`}>
-                              +{(opt.price / 1000)}к ₽
+                            <div className={`text-sm font-bold ${isSelected ? "text-neon" : "text-white/30"}`}>
+                              +{opt.price.toLocaleString("ru-RU")} ₽
                             </div>
                           )}
                         </div>
-                        {isSelected && (
-                          <div className="absolute top-3 right-3">
-                            <div className="w-5 h-5 rounded-full gradient-neon flex items-center justify-center">
-                              <Icon name="Check" size={11} className="text-black" />
-                            </div>
-                          </div>
-                        )}
                       </button>
                     );
                   })}
@@ -712,63 +716,70 @@ function Calculator() {
                 className={`transition-all duration-280 ease-out ${slideClass}`}
                 style={{ transition: "opacity 0.28s ease, transform 0.28s ease" }}
               >
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 gradient-neon rounded-2xl flex items-center justify-center mx-auto mb-5">
-                    <Icon name="CheckCircle" size={30} className="text-black" />
-                  </div>
-                  <h3 className="font-oswald text-3xl font-bold text-white mb-2">Ваш расчёт готов!</h3>
-                  <p className="text-white/50 text-sm">Стоимость рассчитана на основе ваших ответов</p>
-                </div>
-
-                {/* Summary */}
-                <div className="space-y-2 mb-6">
-                  {QUIZ_STEPS.map((s) => {
-                    const sel = answers[s.id] ?? [];
-                    if (sel.length === 0) return null;
-                    return sel.map((key) => {
-                      const opt = s.options.find((o) => o.key === key);
-                      if (!opt) return null;
-                      return (
-                        <div key={key} className="flex justify-between items-center text-sm py-2 border-b border-white/5">
-                          <span className="text-white/60 flex items-center gap-2">
-                            <Icon name={opt.icon} size={13} className="text-neon/60" />
-                            {opt.label}
-                          </span>
-                          <span className="text-white font-medium">
-                            {opt.price === 0 ? "включено" : `${opt.price.toLocaleString("ru-RU")} ₽`}
-                          </span>
-                        </div>
-                      );
-                    });
-                  })}
-                </div>
-
-                {/* Total */}
-                <div className="glass rounded-2xl p-5 border border-neon/25 mb-6">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-white/60 text-sm">Итоговая стоимость</span>
-                    <span className="font-oswald text-3xl font-bold text-white">{total.toLocaleString("ru-RU")} ₽</span>
-                  </div>
-                  {promoTotal > 0 && (
-                    <div className="flex items-center gap-2 text-sm mt-3 pt-3 border-t border-white/8">
-                      <span className="text-2xl">🔥</span>
+                <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+                  {/* Left: header + summary */}
+                  <div>
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-14 h-14 gradient-neon rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <Icon name="CheckCircle" size={28} className="text-black" />
+                      </div>
                       <div>
-                        <span className="text-white/60">Скидка 50% на рекламу — экономия </span>
-                        <span className="text-neon font-bold">{(promoTotal / 2).toLocaleString("ru-RU")} ₽</span>
+                        <h3 className="font-oswald text-3xl lg:text-4xl font-bold text-white">Ваш расчёт готов!</h3>
+                        <p className="text-white/40 text-sm mt-0.5">На основе ваших ответов</p>
                       </div>
                     </div>
-                  )}
-                </div>
 
-                <div className="grid sm:grid-cols-2 gap-3">
-                  <a href="#contact" className="gradient-neon text-black font-bold py-3.5 rounded-xl text-sm text-center hover:opacity-90 transition-opacity">
-                    Оставить заявку
-                  </a>
-                  <button onClick={handleRestart} className="glass border border-white/15 text-white/70 font-semibold py-3.5 rounded-xl text-sm hover:border-white/30 hover:text-white transition-all">
-                    Пересчитать
-                  </button>
+                    <div className="space-y-1">
+                      {QUIZ_STEPS.map((s) => {
+                        const sel = answers[s.id] ?? [];
+                        if (sel.length === 0) return null;
+                        return sel.map((key) => {
+                          const opt = s.options.find((o) => o.key === key);
+                          if (!opt) return null;
+                          return (
+                            <div key={key} className="flex justify-between items-center py-3 border-b border-white/5">
+                              <span className="text-white/60 flex items-center gap-2.5 text-sm">
+                                <span className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                                  <Icon name={opt.icon} size={13} className="text-neon/70" />
+                                </span>
+                                {opt.label}
+                              </span>
+                              <span className={`text-sm font-semibold ${opt.price === 0 ? "text-white/40" : "text-white"}`}>
+                                {opt.price === 0 ? "включено" : `${opt.price.toLocaleString("ru-RU")} ₽`}
+                              </span>
+                            </div>
+                          );
+                        });
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Right: total + CTA */}
+                  <div className="lg:sticky lg:top-28">
+                    <div className="glass rounded-2xl p-7 border border-neon/25 mb-5">
+                      <div className="text-white/50 text-xs uppercase tracking-widest font-semibold mb-4">Итоговая стоимость</div>
+                      <div className="font-oswald text-5xl font-bold text-white mb-2">{total.toLocaleString("ru-RU")} ₽</div>
+                      <p className="text-white/30 text-xs mb-5">Финальная стоимость уточняется после брифинга</p>
+                      {promoTotal > 0 && (
+                        <div className="glass bg-neon/10 rounded-xl p-4 border border-neon/20 mb-5">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">🔥</span>
+                            <span className="text-neon text-sm font-bold">Скидка 50% на рекламу</span>
+                          </div>
+                          <div className="text-white/50 text-xs">
+                            Ваша экономия: <span className="text-neon font-bold">{(promoTotal / 2).toLocaleString("ru-RU")} ₽</span>
+                          </div>
+                        </div>
+                      )}
+                      <a href="#contact" className="block w-full gradient-neon text-black font-bold py-4 rounded-xl text-base text-center hover:opacity-90 transition-opacity mb-3">
+                        Оставить заявку
+                      </a>
+                      <button onClick={handleRestart} className="w-full glass border border-white/15 text-white/60 font-semibold py-3.5 rounded-xl text-sm hover:border-white/30 hover:text-white transition-all">
+                        Пересчитать
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-white/25 text-xs text-center mt-4">Финальная стоимость уточняется после брифинга. Без скрытых платежей.</p>
               </div>
             )}
           </div>

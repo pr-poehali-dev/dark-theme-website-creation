@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
 
 const OFFICE_IMG = "https://cdn.poehali.dev/projects/d95e9221-1396-4885-92d7-b92ecdd56bad/files/4cc87f0d-b0fc-4669-8f66-dbd35e12df43.jpg";
+const LOGO_IMG = "https://cdn.poehali.dev/projects/d95e9221-1396-4885-92d7-b92ecdd56bad/files/7f056c84-de7b-498a-ae7a-b824b0a8f39e.jpg";
 
 function useReveal() {
   useEffect(() => {
@@ -59,8 +60,11 @@ function Nav() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <div className="font-oswald text-2xl font-bold tracking-widest neon-text">
-          VΛV<span className="text-white">E</span>
+        <div className="flex items-center gap-2.5">
+          <img src={LOGO_IMG} alt="Global" className="w-9 h-9 rounded-lg object-cover" />
+          <span className="font-oswald text-2xl font-bold tracking-widest text-white">
+            GL<span className="neon-text">O</span>BAL
+          </span>
         </div>
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
@@ -117,7 +121,7 @@ function Hero() {
                 <span className="text-2xl">🔥</span>
                 <div>
                   <p className="font-bold text-white text-base mb-1">
-                    Закажи сайт сегодня —
+                    Закажи сайт сегодня у <span className="neon-text">Global</span> —
                   </p>
                   <p className="text-neon font-semibold text-sm">
                     получи 50% скидку на ведение рекламы первые 3 месяца
@@ -312,7 +316,7 @@ function About() {
               ЧЕМ АГЕНТСТВО
             </h2>
             <p className="text-white/60 text-base leading-relaxed mb-6">
-              VAVE — это команда фанатиков своего дела. Мы не просто делаем красивые сайты —
+              <span className="neon-text font-bold">Global</span> — это команда фанатиков своего дела. Мы не просто делаем красивые сайты —
               мы строим цифровые машины для привлечения клиентов.
             </p>
             <p className="text-white/60 text-base leading-relaxed mb-8">
@@ -370,7 +374,7 @@ function Clients() {
         <div className="section-reveal mt-12 glass rounded-2xl p-8 border border-neon/20 max-w-2xl mx-auto text-center">
           <div className="text-3xl mb-4">⭐⭐⭐⭐⭐</div>
           <p className="text-white/80 text-base leading-relaxed italic mb-4">
-            "VAVE сделали нам сайт и взяли на SEO-продвижение. За 4 месяца органический трафик вырос в 3 раза. Очень профессиональная команда."
+            "Global сделали нам сайт и взяли на SEO-продвижение. За 4 месяца органический трафик вырос в 3 раза. Очень профессиональная команда."
           </p>
           <div className="font-semibold text-white">Алексей Соколов</div>
           <div className="text-white/40 text-sm">Директор, АвтоЦентр Premium</div>
@@ -675,7 +679,10 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-3 gap-10 mb-10">
           <div>
-            <div className="font-oswald text-3xl font-bold tracking-widest neon-text mb-3">VΛV<span className="text-white">E</span></div>
+            <div className="flex items-center gap-2.5 mb-3">
+              <img src={LOGO_IMG} alt="Global" className="w-9 h-9 rounded-lg object-cover" />
+              <span className="font-oswald text-2xl font-bold tracking-widest text-white">GL<span className="neon-text">O</span>BAL</span>
+            </div>
             <p className="text-white/40 text-sm leading-relaxed max-w-xs">Создаём сайты и продвигаем бизнес в интернете. Работаем с 2016 года.</p>
           </div>
           <div>
@@ -706,7 +713,7 @@ function Footer() {
           </div>
         </div>
         <div className="border-t border-white/8 pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <span className="text-white/25 text-xs">© 2026 VAVE Agency. Все права защищены.</span>
+          <span className="text-white/25 text-xs">© 2026 Global Agency. Все права защищены.</span>
           <span className="text-white/25 text-xs">Политика конфиденциальности · Оферта</span>
         </div>
       </div>

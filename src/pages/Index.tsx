@@ -347,12 +347,35 @@ function About() {
 }
 
 // ─── CLIENTS ──────────────────────────────────────────────────────────────────
+type Client = { key: string; label: string; author: string; role: string; review: string; stars: number };
+
 function Clients() {
-  const logos = [
-    "СТРОЙ ПРО", "МЕДИА ГРУПП", "АВТОЦЕНТР", "ФИТНЕС КЛУБ",
-    "НОРД БАНК", "АГРО ЭКСПОРТ", "ЛЮКС ТРЕВЕЛ", "ГОРОДСКОЙ РЫНОК",
-    "ТЕХНО ХАБ", "ЗДОРОВЬЕ+",
+  const clients: Client[] = [
+    { key: "stroy", label: "СТРОЙ ПРО", author: "Дмитрий Ковалёв", role: "Генеральный директор, Строй Про", stars: 5, review: "Global разработали нам корпоративный сайт с каталогом и личным кабинетом. Всё сделали точно в срок, дизайн понравился с первого показа. Трафик вырос на 180% за 2 месяца." },
+    { key: "media", label: "МЕДИА ГРУПП", author: "Светлана Орлова", role: "Маркетинг-директор, Медиа Групп", stars: 5, review: "Работаем с Global по SMM и таргетированной рекламе уже год. Количество заявок из соцсетей выросло в 4 раза. Команда всегда на связи и предлагает нестандартные решения." },
+    { key: "auto", label: "АВТОЦЕНТР", author: "Алексей Соколов", role: "Директор, АвтоЦентр Premium", stars: 5, review: "Global сделали нам сайт и взяли на SEO-продвижение. За 4 месяца органический трафик вырос в 3 раза. Очень профессиональная команда — рекомендуем без оговорок." },
+    { key: "fit", label: "ФИТНЕС КЛУБ", author: "Мария Захарова", role: "Владелец, FitLife Club", stars: 5, review: "Заказали лендинг и настройку Яндекс Директ. Уже в первую неделю пошли звонки. Стоимость лида снизилась в 2 раза по сравнению с предыдущим подрядчиком. Спасибо!" },
+    { key: "bank", label: "НОРД БАНК", author: "Игорь Петренко", role: "Руководитель digital, Норд Банк", stars: 5, review: "Сложный корпоративный проект с интеграциями и строгими требованиями к безопасности. Global справились на отлично — выполнили всё в рамках бюджета и сроков." },
+    { key: "agro", label: "АГРО ЭКСПОРТ", author: "Николай Быков", role: "Коммерческий директор, АгроЭкспорт", stars: 4, review: "Разработали интернет-магазин с каталогом продукции и формой заказа. Хорошая работа — сайт стал удобным для клиентов, обращения увеличились на 60%." },
+    { key: "travel", label: "ЛЮКС ТРЕВЕЛ", author: "Анна Волкова", role: "Основатель, Люкс Тревел", stars: 5, review: "Global помогли нам выйти в топ по ключевым запросам за 3 месяца. Органика теперь даёт 70% всех броней. Это лучшая инвестиция в маркетинг за последние годы." },
+    { key: "market", label: "ГОРОДСКОЙ РЫНОК", author: "Павел Сидоров", role: "IT-директор, Городской Рынок", stars: 5, review: "Переделали устаревший сайт в современную платформу. Скорость загрузки выросла в 5 раз, конверсия — на 40%. Работаем с Global уже по третьему проекту." },
+    { key: "tech", label: "ТЕХНО ХАБ", author: "Роман Кузнецов", role: "CEO, ТехноХаб", stars: 5, review: "Обратились за разработкой веб-приложения с личным кабинетом. Команда Global погрузилась в бизнес-логику и предложила несколько идей, которые мы сами не додумали." },
+    { key: "health", label: "ЗДОРОВЬЕ+", author: "Елена Морозова", role: "Главный врач, Здоровье+", stars: 5, review: "Сделали сайт клиники и запустили рекламу в Яндексе. Запись на приём через сайт выросла на 220% за первый квартал. Очень довольны результатом и сервисом." },
   ];
+
+  const [activeKey, setActiveKey] = useState(clients[2].key);
+  const [animating, setAnimating] = useState(false);
+
+  const active = clients.find((c) => c.key === activeKey) ?? clients[0];
+
+  const handleSelect = (key: string) => {
+    if (key === activeKey) return;
+    setAnimating(true);
+    setTimeout(() => {
+      setActiveKey(key);
+      setAnimating(false);
+    }, 250);
+  };
 
   return (
     <section id="clients" className="py-24 relative overflow-hidden border-t border-white/5">
@@ -361,23 +384,46 @@ function Clients() {
         <div className="section-reveal text-center mb-14">
           <span className="text-neon text-sm font-semibold uppercase tracking-widest">Нам доверяют</span>
           <h2 className="font-oswald text-4xl font-bold text-white mt-3">НАШИ КЛИЕНТЫ</h2>
+          <p className="text-white/40 text-sm mt-2">Нажми на компанию, чтобы прочитать отзыв</p>
         </div>
 
-        <div className="section-reveal grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-          {logos.map((logo) => (
-            <div key={logo} className="glass rounded-xl py-5 px-4 flex items-center justify-center border border-white/6 hover:border-neon/30 hover:bg-neon/5 transition-all duration-300 group">
-              <span className="font-oswald font-bold text-sm tracking-widest text-white/30 group-hover:text-neon transition-colors duration-300">{logo}</span>
-            </div>
+        <div className="section-reveal grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-10">
+          {clients.map((c) => (
+            <button
+              key={c.key}
+              onClick={() => handleSelect(c.key)}
+              className={`rounded-xl py-5 px-4 flex items-center justify-center border transition-all duration-300 ${
+                activeKey === c.key
+                  ? "bg-neon/15 border-neon shadow-[0_0_20px_rgba(0,255,180,0.15)]"
+                  : "glass border-white/6 hover:border-neon/30 hover:bg-neon/5"
+              }`}
+            >
+              <span className={`font-oswald font-bold text-sm tracking-widest transition-colors duration-300 ${
+                activeKey === c.key ? "text-neon" : "text-white/30"
+              }`}>
+                {c.label}
+              </span>
+            </button>
           ))}
         </div>
 
-        <div className="section-reveal mt-12 glass rounded-2xl p-8 border border-neon/20 max-w-2xl mx-auto text-center">
-          <div className="text-3xl mb-4">⭐⭐⭐⭐⭐</div>
-          <p className="text-white/80 text-base leading-relaxed italic mb-4">
-            "Global сделали нам сайт и взяли на SEO-продвижение. За 4 месяца органический трафик вырос в 3 раза. Очень профессиональная команда."
-          </p>
-          <div className="font-semibold text-white">Алексей Соколов</div>
-          <div className="text-white/40 text-sm">Директор, АвтоЦентр Premium</div>
+        <div className="section-reveal max-w-2xl mx-auto">
+          <div
+            className={`glass rounded-2xl p-8 border border-neon/20 text-center transition-all duration-250 ${
+              animating ? "opacity-0 translate-y-3" : "opacity-100 translate-y-0"
+            }`}
+            style={{ transition: "opacity 0.25s ease, transform 0.25s ease" }}
+          >
+            <div className="text-2xl mb-4">
+              {"⭐".repeat(active.stars)}
+            </div>
+            <p className="text-white/80 text-base leading-relaxed italic mb-6">
+              "{active.review}"
+            </p>
+            <div className="w-10 h-px bg-neon/40 mx-auto mb-4" />
+            <div className="font-semibold text-white">{active.author}</div>
+            <div className="text-white/40 text-sm mt-1">{active.role}</div>
+          </div>
         </div>
       </div>
     </section>

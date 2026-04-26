@@ -985,91 +985,137 @@ function Footer() {
   );
 }
 
+// Цвета фона для каждой секции
+const SECTION_THEMES = [
+  // hero
+  { bg: "10, 12, 20",      a: "59,130,246", b: "34,211,238" },
+  // services
+  { bg: "8, 14, 26",       a: "37,99,235",  b: "6,182,212"  },
+  // video
+  { bg: "6, 10, 22",       a: "29,78,216",  b: "8,145,178"  },
+  // about
+  { bg: "10, 8, 24",       a: "67,56,202",  b: "59,130,246" },
+  // clients
+  { bg: "8, 14, 26",       a: "37,99,235",  b: "34,211,238" },
+  // process
+  { bg: "6, 12, 20",       a: "59,130,246",  b: "14,165,233" },
+  // calculator
+  { bg: "10, 10, 22",      a: "29,78,216",  b: "6,182,212"  },
+  // contact
+  { bg: "8, 8, 18",        a: "37,99,235",  b: "34,211,238" },
+];
+
 // ─── BACKGROUND LAYER ─────────────────────────────────────────────────────────
 function GlobalBackground() {
+  const [theme, setTheme] = useState(0);
+  const rafRef = useRef<number>(0);
+
+  useEffect(() => {
+    const sections = ["hero-section", "services", "video-section", "about", "clients", "process-section", "calculator", "contact"];
+
+    const handleScroll = () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        const scrollY = window.scrollY + window.innerHeight * 0.35;
+        let active = 0;
+        sections.forEach((id, i) => {
+          const el = document.getElementById(id) ?? document.querySelector(`[data-section="${id}"]`) as HTMLElement;
+          if (el && el.offsetTop <= scrollY) active = i;
+        });
+        setTheme(active);
+      });
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  const t = SECTION_THEMES[theme] ?? SECTION_THEMES[0];
+
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {/* Текстура — тонкая сетка точек */}
+    <div
+      className="fixed inset-0 pointer-events-none overflow-hidden z-0"
+      style={{ transition: "background-color 1.2s ease", backgroundColor: `rgb(${t.bg})` }}
+    >
+      {/* Текстура — сетка точек */}
       <div
-        className="absolute inset-0 opacity-[0.035]"
+        className="absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)`,
+          backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.9) 1px, transparent 1px)`,
           backgroundSize: "36px 36px",
         }}
       />
 
-      {/* Крупные градиентные пятна — фиксированные */}
-      <div className="absolute top-[-10%] left-[-5%] w-[600px] h-[600px] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.07) 0%, transparent 70%)" }} />
-      <div className="absolute bottom-[10%] right-[-5%] w-[500px] h-[500px] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(34,211,238,0.06) 0%, transparent 70%)" }} />
-      <div className="absolute top-[45%] left-[35%] w-[700px] h-[300px] rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.04) 0%, transparent 70%)" }} />
+      {/* Динамичный orb 1 — верхний левый */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          top: "-10%", left: "-8%",
+          width: "65vw", height: "65vw",
+          background: `radial-gradient(circle, rgba(${t.a},0.10) 0%, transparent 65%)`,
+          transition: "background 1.2s ease",
+          animation: "orbFloat1 14s ease-in-out infinite",
+        }}
+      />
+
+      {/* Динамичный orb 2 — нижний правый */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          bottom: "-15%", right: "-10%",
+          width: "55vw", height: "55vw",
+          background: `radial-gradient(circle, rgba(${t.b},0.08) 0%, transparent 65%)`,
+          transition: "background 1.2s ease",
+          animation: "orbFloat2 18s ease-in-out infinite",
+        }}
+      />
+
+      {/* Центральный orb */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          top: "30%", left: "25%",
+          width: "50vw", height: "40vw",
+          background: `radial-gradient(circle, rgba(${t.a},0.04) 0%, transparent 70%)`,
+          transition: "background 1.2s ease",
+          animation: "orbFloat3 22s ease-in-out infinite",
+        }}
+      />
 
       {/* Параллакс-элементы — двигаются за курсором */}
-
-      {/* Большой синий круг — верхний левый */}
       <div
         data-parallax="0.6"
         className="absolute top-[8%] left-[5%] w-72 h-72 rounded-full border border-blue-500/10"
-        style={{ background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+        style={{ background: `radial-gradient(circle, rgba(${t.a},0.07) 0%, transparent 70%)`, transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94), background 1.2s ease" }}
       />
-
-      {/* Малый голубой круг — правый центр */}
       <div
         data-parallax="1.2"
-        className="absolute top-[30%] right-[8%] w-40 h-40 rounded-full border border-cyan-400/15"
-        style={{ background: "radial-gradient(circle, rgba(34,211,238,0.1) 0%, transparent 70%)", transition: "transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+        className="absolute top-[30%] right-[8%] w-40 h-40 rounded-full border border-cyan-400/10"
+        style={{ background: `radial-gradient(circle, rgba(${t.b},0.09) 0%, transparent 70%)`, transition: "transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), background 1.2s ease" }}
       />
-
-      {/* Квадрат повёрнутый — левый центр */}
       <div
         data-parallax="0.8"
         className="absolute top-[55%] left-[3%] w-24 h-24 border border-blue-500/10 rotate-45"
         style={{ transition: "transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94)" }}
       />
-
-      {/* Крестик / плюс — правый верх */}
-      <div
-        data-parallax="1.5"
-        className="absolute top-[15%] right-[18%] opacity-20"
-        style={{ transition: "transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94)" }}
-      >
+      <div data-parallax="1.5" className="absolute top-[15%] right-[18%] opacity-20" style={{ transition: "transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94)" }}>
         <div className="relative w-8 h-8">
           <div className="absolute top-1/2 left-0 w-full h-px bg-blue-400" />
           <div className="absolute left-1/2 top-0 h-full w-px bg-blue-400" />
         </div>
       </div>
-
-      {/* Крестик — нижний левый */}
-      <div
-        data-parallax="1.0"
-        className="absolute bottom-[25%] left-[20%] opacity-15"
-        style={{ transition: "transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" }}
-      >
+      <div data-parallax="1.0" className="absolute bottom-[25%] left-[20%] opacity-[0.15]" style={{ transition: "transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94)" }}>
         <div className="relative w-6 h-6">
           <div className="absolute top-1/2 left-0 w-full h-px bg-cyan-400" />
           <div className="absolute left-1/2 top-0 h-full w-px bg-cyan-400" />
         </div>
       </div>
-
-      {/* Треугольник — нижний правый */}
-      <div
-        data-parallax="0.9"
-        className="absolute bottom-[15%] right-[12%] opacity-10"
-        style={{ transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)" }}
-      >
-        <div
-          style={{
-            width: 0, height: 0,
-            borderLeft: "30px solid transparent",
-            borderRight: "30px solid transparent",
-            borderBottom: "52px solid rgba(59,130,246,0.6)",
-          }}
-        />
+      <div data-parallax="0.9" className="absolute bottom-[15%] right-[12%] opacity-10" style={{ transition: "transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94)" }}>
+        <div style={{ width: 0, height: 0, borderLeft: "30px solid transparent", borderRight: "30px solid transparent", borderBottom: "52px solid rgba(59,130,246,0.5)" }} />
       </div>
-
-      {/* Маленькие точки — рассыпаны по фону */}
       {[
         { top: "12%", left: "28%", p: "1.8" },
         { top: "38%", left: "72%", p: "0.7" },
@@ -1081,22 +1127,10 @@ function GlobalBackground() {
         <div
           key={i}
           data-parallax={d.p}
-          className="absolute w-2 h-2 rounded-full bg-blue-400/30"
+          className="absolute w-2 h-2 rounded-full bg-blue-400/25"
           style={{ top: d.top, left: d.left, transition: `transform ${0.3 + i * 0.1}s cubic-bezier(0.25,0.46,0.45,0.94)` }}
         />
       ))}
-
-      {/* Горизонтальные линии — декор */}
-      <div
-        data-parallax="0.3"
-        className="absolute top-[42%] left-0 w-[15%] h-px"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(59,130,246,0.2), transparent)", transition: "transform 0.8s ease" }}
-      />
-      <div
-        data-parallax="0.3"
-        className="absolute top-[60%] right-0 w-[12%] h-px"
-        style={{ background: "linear-gradient(270deg, transparent, rgba(34,211,238,0.2), transparent)", transition: "transform 0.8s ease" }}
-      />
     </div>
   );
 }
@@ -1110,15 +1144,14 @@ const Index = () => {
       <GlobalBackground />
       <div className="relative z-10">
         <Nav />
-        <Hero />
-        <Ticker />
-        <Services />
-        <VideoSection />
-        <About />
-        <Clients />
-        <Process />
-        <Calculator />
-        <Contact />
+        <div id="hero-section"><Hero /><Ticker /></div>
+        <div data-section="services"><Services /></div>
+        <div data-section="video-section"><VideoSection /></div>
+        <div data-section="about"><About /></div>
+        <div data-section="clients"><Clients /></div>
+        <div data-section="process-section"><Process /></div>
+        <div data-section="calculator"><Calculator /></div>
+        <div data-section="contact"><Contact /></div>
         <Footer />
       </div>
     </div>
